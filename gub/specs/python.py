@@ -180,8 +180,6 @@ class Python__tools (tools.AutoBuild, Python):
         'python-2.4.5-readline.patch', # Stop python from reading ~/.inputrc
         'python-2.4.5-db4.7.patch',
         'python-2.4.5-regen.patch',
-        'python-2.4.5-gcc-R.patch',
-        'python-2.4.5-Setup-crypt.patch',
         ]
     dependencies = [
         'autoconf',
@@ -190,6 +188,6 @@ class Python__tools (tools.AutoBuild, Python):
         ]
     force_autoupdate = True
     parallel_build_broken = True
-    make_flags = Python.make_flags + ' LIBC=-lcrypt'
+    make_flags = Python.make_flags
     def patch (self):
         Python.patch (self)
