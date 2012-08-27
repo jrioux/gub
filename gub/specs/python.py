@@ -30,6 +30,7 @@ class Python (target.AutoBuild):
         'python-2.4.5-python-2.6.patch',
         'python-2.4.5-native.patch',
         'python-2.4.5-db4.7.patch',
+        'python-2.4.5-setup-cross.patch',
         ]
     dependencies = ['db-devel', 'expat-devel', 'zlib-devel', 'tools::python']
     force_autoupdate = True
@@ -39,6 +40,7 @@ class Python (target.AutoBuild):
         'struct',
         'time',
         ]
+    not_supported = []
     make_flags = misc.join_lines (r'''
 BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
 ''')
@@ -50,7 +52,7 @@ BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
                 + target.AutoBuild.install_command)
     def patch (self):
         target.AutoBuild.patch (self)
-        self.file_sub ([('@CC@', '@CC@ -I$(shell pwd)')],
+        self.file_sub ([('@CC@', '@CC@ -I%(builddir)s')],
                         '%(srcdir)s/Makefile.pre.in')
     def autoupdate (self):
         target.AutoBuild.autoupdate (self)
@@ -66,6 +68,10 @@ BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
             so = self.expand ('%(so_extension)s')
             all = [x.replace (dynload_dir + '/', '') for x in misc.find_files (dynload_dir, '.*' + so)]
             failed = [x.replace (dynload_dir + '/', '') for x in misc.find_files (dynload_dir, '.*failed' + so)]
+            for i in self.not_supported:
+                m = i + '_failed' + so
+                if m in failed:
+                    failed.remove (m)
             if failed:
                 logger.write_log ('failed python modules:' + ', '.join (failed), 'error')
             for module in self.so_modules:
@@ -180,6 +186,7 @@ class Python__tools (tools.AutoBuild, Python):
         'python-2.4.5-readline.patch', # Stop python from reading ~/.inputrc
         'python-2.4.5-db4.7.patch',
         'python-2.4.5-regen.patch',
+        'python-2.4.5-setup-cross.patch',
         ]
     dependencies = [
         'autoconf',
@@ -188,6 +195,7 @@ class Python__tools (tools.AutoBuild, Python):
         ]
     force_autoupdate = True
     parallel_build_broken = True
+    not_supported = ['nis', 'crypt']
     make_flags = Python.make_flags
     def patch (self):
         Python.patch (self)
