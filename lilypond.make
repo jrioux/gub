@@ -73,7 +73,7 @@ TOOLS_BIN_DIR=$(CWD)/target/tools/root/usr/bin/
 #FIXME: we cannot use python from tools, because of the gub/logging.py
 #       name clash.  Todo: rename gub/logging.py -- triggers full
 #       rebuild.  Not using tools means: we depend on /usr/bin/makeinfo
-#SET_TOOLS_PATH=PATH=$(CWD)/target/tools/root/usr/bin:$(PATH)
+SET_TOOLS_PATH=PATH=$(CWD)/target/tools/root/usr/bin:$(PATH)
 
 LILYPOND_VERSIONS = versiondb/lilypond.versions
 
