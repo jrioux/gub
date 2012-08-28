@@ -8,8 +8,8 @@ from gub import loggedos
 from gub import misc
 from gub import octal
 
-python_version = '2.4'
-#python_version = '2.6'
+#python_version = '2.4'
+python_version = '2.6'
 
 def get_cross_build_dependencies (settings):
     return []
