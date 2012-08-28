@@ -2,6 +2,14 @@ from gub import target
 from gub import tools
 from gub.specs import python
 
+def get_conflict_dict (self):
+    return {
+        '': ['python-2.4', 'python'],
+        'doc': ['python-2.4-doc', 'python-doc'],
+        'devel': ['python-2.4-devel', 'python-devel'],
+        'runtime': ['python-2.4-runtime', 'python-runtime'],
+        }
+
 class Python_2_6 (python.Python):
     source = 'http://www.python.org/ftp/python/2.6.4/Python-2.6.4.tar.bz2'
     dependencies = [
@@ -36,6 +44,7 @@ ac_cv_py_format_size_t=no
         'itertools',
         'time',
         ]
+    get_conflict_dict = get_conflict_dict
 
 class Python_2_6__mingw (python.Python__mingw):
     source = Python_2_6.source
@@ -58,11 +67,17 @@ ac_cv_have_lchflags=no
 ac_cv_py_format_size_t=no
 '''
     so_modules = Python_2_6.so_modules
+    get_conflict_dict = get_conflict_dict
     def patch (self):
         python.Python__mingw.patch (self)
         self.system ('cd %(srcdir)s && cp -pv PC/dl_nt.c Python/fileblocks.c')
     def generate_dll_a_and_la (self, libname, depend=''):
         target.AutoBuild.generate_dll_a_and_la (self, 'python2.6', depend)
+
+class Python_2_4__mingw_binary (python.Python__mingw_binary):
+    get_conflict_dict = get_conflict_dict
+class Python_2_4__freebsd (python.Python__freebsd):
+    get_conflict_dict = get_conflict_dict
 
 class Python_2_6__tools (python.Python__tools):
     source = Python_2_6.source
@@ -74,5 +89,6 @@ class Python_2_6__tools (python.Python__tools):
     force_autoupdate = True
     make_flags = python.Python__tools.make_flags
     so_modules = Python_2_6.so_modules
+    get_conflict_dict = get_conflict_dict
     def patch (self):
         tools.AutoBuild.patch (self)

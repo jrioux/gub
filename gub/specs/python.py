@@ -44,6 +44,13 @@ class Python (target.AutoBuild):
     make_flags = misc.join_lines (r'''
 BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
 ''')
+    def get_conflict_dict (self):
+        return {
+            '': ['python-2.6', 'python-2.4'],
+            'doc': ['python-2.6-doc', 'python-2.4-doc'],
+            'devel': ['python-2.6-devel', 'python-2.4-devel'],
+            'runtime': ['python-2.6-runtime', 'python-2.4-runtime'],
+            }
     def __init__ (self, settings, source):
         target.AutoBuild.__init__ (self, settings, source)
         self.CROSS_ROOT = '%(targetdir)s'
@@ -197,5 +204,12 @@ class Python__tools (tools.AutoBuild, Python):
     parallel_build_broken = True
     not_supported = ['nis', 'crypt']
     make_flags = Python.make_flags
+    def get_conflict_dict (self):
+        return {
+            '': ['python-2.6', 'python-2.4'],
+            'doc': ['python-2.6-doc', 'python-2.4-doc'],
+            'devel': ['python-2.6-devel', 'python-2.4-devel'],
+            'runtime': ['python-2.6-runtime', 'python-2.4-runtime'],
+            }
     def patch (self):
         Python.patch (self)
