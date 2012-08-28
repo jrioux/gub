@@ -23,6 +23,7 @@ class Python_2_6 (python.Python):
 #        'python-2.4.5-db4.7.patch',
         'python-2.6.4-configure.in-cross.patch',
         'python-2.6.4-include-pc.patch',
+        'python-2.6.4-setup-cross.patch',
         ]
     config_cache_overrides = python.Python.config_cache_overrides + '''
 ac_cv_have_chflags=no
@@ -65,12 +66,13 @@ ac_cv_py_format_size_t=no
 
 class Python_2_6__tools (python.Python__tools):
     source = Python_2_6.source
-    patches = []
+    patches = [
+        'python-2.6.4-readline.patch',
+        'python-2.6.4-setup-cross.patch',
+        ]
     dependencies = ['autoconf', 'libtool']
     force_autoupdate = True
     make_flags = python.Python__tools.make_flags
     so_modules = Python_2_6.so_modules
     def patch (self):
         tools.AutoBuild.patch (self)
-        # Stop python from reading ~/.inputrc
-        self.apply_patch('python-2.6.4-readline.patch')
