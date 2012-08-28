@@ -8,7 +8,7 @@ class Python_2_6 (python.Python):
         'db-devel',
         'expat-devel',
         'zlib-devel',
-        'tools::python-2-6'
+        'tools::python',
         ]
     patches = [
         'python-2.6.4.patch',

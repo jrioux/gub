@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 #
 from gub import build
@@ -6,6 +7,10 @@ from gub import context
 from gub import loggedos
 from gub import misc
 from gub import octal
+
+python_version = '2.4'
+python_version = '2.6'
+python_version = ''
 
 def get_cross_build_dependencies (settings):
     return []
@@ -29,6 +34,9 @@ def package_auto_dependency_dict (package):
     if (not package.get_dependency_dict ().get ('', None)
         and not package.get_dependency_dict ().get ('devel', None)):
         def get_build_dependencies (foo):
+            if python_version:
+                package.dependencies = [re.sub ('python$', 'python-' + python_version, name)
+                                        for name in package.dependencies]
             # If a package depends on tools::libtool, ie not on
             # libltdl, we still also need <target-arch>::libtool,
             # because of our update_libtool ().  We fix this here,
