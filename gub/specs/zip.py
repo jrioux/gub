@@ -1,7 +1,7 @@
 from gub import tools
 
 class Zip__tools (tools.AutoBuild):
-    source = 'ftp://ftp.info-zip.org/pub/infozip/src/zip30.tgz'
+    source = 'ftp://ftp.info-zip.org/pub/infozip/src/zip30.tgz&version=3.0'
     srcdir_build_broken = True
 #    configure_binary = '%(srcdir)s/unix/configure'
     def configure (self):
