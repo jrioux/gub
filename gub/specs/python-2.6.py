@@ -16,8 +16,9 @@ class Python_2_6 (python.Python_2_4):
     dependencies = [
         'db-devel',
         'expat-devel',
+        'libffi-devel',
         'zlib-devel',
-        'tools::python',
+        'tools::python-2.6',
         ]
     patches = [
         'python-2.6.4.patch',
@@ -33,6 +34,7 @@ class Python_2_6 (python.Python_2_4):
         'python-2.6.4-configure.in-cross.patch',
         'python-2.6.4-include-pc.patch',
         'python-2.6.4-setup-cross.patch',
+        'python-2.6.4-unixcompiler-libtool.patch',
         ]
     config_cache_overrides = python.Python_2_4.config_cache_overrides + '''
 ac_cv_have_chflags=no
@@ -45,7 +47,11 @@ ac_cv_py_format_size_t=no
         'itertools',
         'time',
         ]
+    configure_flags = (python.Python_2_4.configure_flags
+                       + ' --with-system-ffi')
     get_conflict_dict = get_conflict_dict
+    def python_version (self):
+        return '2.6'
 
 class Python_2_6__mingw (python.Python_2_4__mingw):
     source = Python_2_6.source
@@ -53,15 +59,11 @@ class Python_2_6__mingw (python.Python_2_4__mingw):
         'python-2.4.2-winsock2.patch',
         'python-2.4.2-setup.py-selectmodule.patch',
         'python-2.4.5-disable-pwd-mingw.patch',
-        'python-2.4.5-mingw-site.patch',
+        'python-2.6.4-mingw-site.patch',
         'python-2.4.5-mingw-socketmodule.patch',
+        'python-2.6.4-mingw-ctypes.patch',
         ]
-    dependencies = [
-        'db-devel',
-        'expat-devel',
-        'zlib-devel',
-        'tools::python',
-        ]
+    dependencies = Python_2_6.dependencies + ['pthreads-w32-devel']
     config_cache_overrides = python.Python_2_4__mingw.config_cache_overrides + '''
 ac_cv_have_chflags=no
 ac_cv_have_lchflags=no
@@ -69,27 +71,53 @@ ac_cv_py_format_size_t=no
 '''
     so_modules = Python_2_6.so_modules
     get_conflict_dict = get_conflict_dict
+    configure_flags = (python.Python_2_4__mingw.configure_flags
+                       + ' --with-system-ffi')
     def patch (self):
         python.Python_2_4__mingw.patch (self)
         self.system ('cd %(srcdir)s && cp -pv PC/dl_nt.c Python/fileblocks.c')
     def generate_dll_a_and_la (self, libname, depend=''):
-        target.AutoBuild.generate_dll_a_and_la (self, 'python2.6', depend)
+        target.AutoBuild.generate_dll_a_and_la (self, 'python%(python_version)s', depend)
+    def configure (self):
+        Python_2_4__mingw.configure (self)
 
-class Python_2_6__mingw_binary (python.Python_2_4__mingw_binary):
-    get_conflict_dict = get_conflict_dict
-class Python_2_6__freebsd (python.Python_2_4__freebsd):
-    get_conflict_dict = get_conflict_dict
+class Python_2_6__linux__ppc (Python_2_6):
+    pass
 
-class Python_2_6__tools (python.Python_2_4__tools):
-    source = Python_2_6.source
+class Python_2_6__freebsd (Python_2_6):
+    def configure (self):
+        Python_2_6.configure (self)
+        self.file_sub ([
+                ('^CFLAGSFORSHARED=.*', 'CFLAGSFORSHARED = -fPIC'),
+                ('^LDLIBRARY=.*', 'LDLIBRARY = libpython$(VERSION).so'),
+                ('^INSTSONAME=.*', 'INSTSONAME = libpython$(VERSION).so.0.1'),
+                ], '%(builddir)s/Makefile')
+        # avoid re-running makesetup and overwriting Makefile
+        self.system ('cd %(builddir)s && make Modules/config.c')
+
+class Python_2_6__tools (tools.AutoBuild, Python_2_6):
     patches = [
         'python-2.6.4-readline.patch',
         'python-2.6.4-setup-cross.patch',
         ]
-    dependencies = ['autoconf', 'libtool']
+    dependencies = [
+        'autoconf',
+        'db', # _bsddb
+        'libffi',
+        'libtool',
+        ]
     force_autoupdate = True
-    make_flags = python.Python_2_4__tools.make_flags
-    so_modules = Python_2_6.so_modules
-    get_conflict_dict = get_conflict_dict
+    parallel_build_broken = True
+    not_supported = ['nis', 'crypt']
+    configure_flags = (tools.AutoBuild.configure_flags
+                       + ' --with-system-ffi')
     def patch (self):
-        tools.AutoBuild.patch (self)
+        Python_2_6.patch (self)
+    def configure (self):
+        tools.AutoBuild.configure (self)
+        self.file_sub ([
+                ('^LDSHARED=.*', 'LDSHARED = $(CC) -shared -fPIC'),
+                ('BLDSHARED=.*', 'BLDSHARED = $(CC) -shared -fPIC -L. -lpython%(python_version)s'),
+                ], '%(builddir)s/Makefile')
+        # avoid re-running makesetup and overwriting Makefile
+        self.system ('cd %(builddir)s && make Modules/config.c')

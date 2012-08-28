@@ -31,9 +31,16 @@ class Python_2_4 (target.AutoBuild):
         'python-2.4.5-native.patch',
         'python-2.4.5-db4.7.patch',
         'python-2.4.5-setup-cross.patch',
+        'python-2.6.4-unixcompiler-libtool.patch',
         ]
-    dependencies = ['db-devel', 'expat-devel', 'zlib-devel', 'tools::python']
+    dependencies = [
+        'db-devel',
+        'expat-devel',
+        'zlib-devel',
+        'tools::python-2.4'
+        ]
     force_autoupdate = True
+    parallel_build_broken = True
     subpackage_names = ['doc', 'devel', 'runtime', '']
     so_modules = [
         'itertools',
@@ -41,9 +48,8 @@ class Python_2_4 (target.AutoBuild):
         'time',
         ]
     not_supported = []
-    make_flags = misc.join_lines (r'''
-BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
-''')
+    def python_version (self):
+        return '2.4'
     def get_conflict_dict (self):
         return {
             '': ['python-2.6', 'python-2.4'],
@@ -55,7 +61,7 @@ BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
         target.AutoBuild.__init__ (self, settings, source)
         self.CROSS_ROOT = '%(targetdir)s'
         if 'stat' in misc.librestrict ():
-            self.install_command = ('LIBRESTRICT_ALLOW=/usr/lib/python2.4/lib-dynload:${LIBRESTRICT_ALLOW-/foo} '
+            self.install_command = ('LIBRESTRICT_ALLOW=/usr/lib/python%(python_version)s/lib-dynload:${LIBRESTRICT_ALLOW-/foo} '
                 + target.AutoBuild.install_command)
     def patch (self):
         target.AutoBuild.patch (self)
@@ -67,6 +73,16 @@ BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
         if self.settings.build_platform == self.settings.target_platform:
             self.file_sub ([('cross_compiling=(maybe|no|yes)',
                              'cross_compiling=no')], '%(srcdir)s/configure')
+    def configure (self):
+        target.AutoBuild.configure (self)
+        self.file_sub ([
+                ('^CCSHARED=.*', 'CCSHARED = -fPIC'),
+                ('^LDSHARED=.*', 'LDSHARED = $(CC) -shared -fPIC'),
+                ('BLDSHARED=.*', 'BLDSHARED = $(CC) -shared -fPIC -L. -lpython%(python_version)s'),
+                ('^BLDLIBRARY=.*', 'BLDLIBRARY = %(rpath)s -L. -lpython$(VERSION)'),
+                ], '%(builddir)s/Makefile')
+        # avoid re-running makesetup and overwriting Makefile
+        self.system ('cd %(builddir)s && make Modules/config.c')
     def install (self):
         target.AutoBuild.install (self)
         misc.dump_python_config (self)
@@ -94,9 +110,6 @@ BLDLIBRARY='%(rpath)s -L. -lpython$(VERSION)'
 class Python_2_4__mingw_binary (build.BinaryBuild):
     source = 'http://lilypond.org/~hanwen/python-2.4.2-windows.tar.gz'
 
-    def python_version (self):
-        return '2.4'
-
     def install (self):
         build.BinaryBuild.install (self)
         self.system ('''
@@ -109,8 +122,9 @@ class Python_2_4__freebsd (Python_2_4):
     def configure (self):
         Python_2_4.configure (self)
         self.file_sub ([
-                ('^LDSHARED=.*', 'LDSHARED = $(CC) -shared'),
-                ('BLDSHARED=.*', 'BLDSHARED = $(CC) -shared'),
+                ('^CFLAGSFORSHARED=.*', 'CFLAGSFORSHARED = -fPIC'),
+                ('^LDLIBRARY=.*', 'LDLIBRARY = libpython$(VERSION).so'),
+                ('^INSTSONAME=.*', 'INSTSONAME = libpython$(VERSION).so.0.1'),
                 ], '%(builddir)s/Makefile')
 
 class Python_2_4__mingw (Python_2_4):
@@ -131,7 +145,7 @@ ac_cv_sizeof_pthread_t=12
 ''')
     def __init__ (self, settings, source):
         Python_2_4.__init__ (self, settings, source)
-        self.target_gcc_flags = '-DMS_WINDOWS -DPy_WIN_WIDE_FILENAMES -I%(system_prefix)s/include' % self.settings.__dict__
+        self.target_gcc_flags = '-DMS_WINDOWS -DMS_WIN32 -DPy_WIN_WIDE_FILENAMES -I%(system_prefix)s/include' % self.settings.__dict__
     dependencies = Python_2_4.dependencies + ['pthreads-w32-devel']
     # FIXME: first is cross compile + mingw patch, backported to
     # 2.4.2 and combined in one patch; move to cross-Python?
@@ -142,12 +156,25 @@ ac_cv_sizeof_pthread_t=12
                 ], "%(srcdir)s/Lib/subprocess.py",
                        must_succeed=True)
     def configure (self):
-        Python_2_4.configure (self)
+        target.AutoBuild.configure (self)
         self.dump ('''
 _subprocess ../PC/_subprocess.c
 msvcrt ../PC/msvcrtmodule.c
 ''',
                    '%(builddir)s/Modules/Setup',
+                   mode='a')
+        # avoid re-running makesetup and overwriting Makefile
+        self.system ('cd %(builddir)s && make Modules/config.c')
+        if 0:
+            self.file_sub ([
+#                ('^LDSHARED=.*', 'LDSHARED = $(CC) -shared -fPIC'),
+                ('^LIBC=.*', 'LIBC = -lpython%(python_version)s -lwsock32 -luuid -loleaut32 -lole32'),
+#                 ('^EXT_LIBS=.*', 'EXT_LIBS = -lpython%(python_version)s -lwsock32 -luuid -loleaut32 -lole32'),
+                ], '%(builddir)s/Makefile')
+        self.dump ('''
+EXT_LIBS = -lpython%(python_version)s -lwsock32 -luuid -loleaut32 -lole32
+''',
+                   '%(builddir)s/Makefile',
                    mode='a')
     def compile (self):
         self.system ('''
@@ -165,7 +192,7 @@ cd %(builddir)s && cp -p python-console.exe python.exe
         self.system ('''
 cd %(builddir)s && cp -p python-windows.exe python-console.exe %(install_prefix)s/bin
 ''')
-        self.file_sub ([('extra = ""', 'extra = "-L%(system_prefix)s/bin -L%(system_prefix)s/lib -lpython2.4 -lpthread"')],
+        self.file_sub ([('extra = ""', 'extra = "-L%(system_prefix)s/bin -L%(system_prefix)s/lib -lpython%(python_version)s -lpthread"')],
                        '%(install_prefix)s%(cross_dir)s/bin/python-config')
 
         def rename_so (logger, fname):
@@ -185,7 +212,10 @@ chmod 755 %(install_prefix)s/bin/*
         # This builds and runs in wine, but produces DLLs that
         # do not load in Windows Vista
         if 0:
-            self.generate_dll_a_and_la ('python2.4', '-lpthread')
+            self.generate_dll_a_and_la ('python%(python_version)s', '-lpthread')
+
+class Python_2_4__linux__ppc (Python_2_4):
+    pass
 
 class Python_2_4__tools (tools.AutoBuild, Python_2_4):
     patches = [
@@ -203,13 +233,15 @@ class Python_2_4__tools (tools.AutoBuild, Python_2_4):
     force_autoupdate = True
     parallel_build_broken = True
     not_supported = ['nis', 'crypt']
-    make_flags = Python_2_4.make_flags
-    def get_conflict_dict (self):
-        return {
-            '': ['python-2.6', 'python-2.4'],
-            'doc': ['python-2.6-doc', 'python-2.4-doc'],
-            'devel': ['python-2.6-devel', 'python-2.4-devel'],
-            'runtime': ['python-2.6-runtime', 'python-2.4-runtime'],
-            }
+    get_conflict_dict = Python_2_4.get_conflict_dict
     def patch (self):
         Python_2_4.patch (self)
+    def configure (self):
+        tools.AutoBuild.configure (self)
+        self.file_sub ([
+                ('^CCSHARED=.*', 'CCSHARED = -fPIC'),
+                ('^LDSHARED=.*', 'LDSHARED = $(CC) -shared -fPIC'),
+                ('BLDSHARED=.*', 'BLDSHARED = $(CC) -shared -fPIC -L. -lpython%(python_version)s'),
+                ], '%(builddir)s/Makefile')
+        # avoid re-running makesetup and overwriting Makefile
+        self.system ('cd %(builddir)s && make Modules/config.c')
