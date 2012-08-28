@@ -1,3 +1,5 @@
+import re
+#
 from gub import target
 from gub import tools
 
@@ -23,10 +25,12 @@ build_ext.build_ext.get_libraries = get_libraries
 '''
             setup = self.expand ('%(srcdir)s/setup.py')
             s = open (setup).read ()
+            s = re.sub (' H..?ring ', 'Haering', s)
             open (setup, 'w').write (self.expand (dist_fix) + s)
         self.func (defer)
     install_command = 'cd %(srcdir)s && SO=%(so_extension)s LDSHARED="$CC -shared" LDFLAGS="-L%(system_prefix)s/bin -lpython%(python_version)s" CFLAGS="--verbose" python %(srcdir)s/setup.py install --prefix=%(prefix_dir)s --root=%(install_root)s'
     dependencies = [
+        'python',
         'sqlite',
         'tools::setuptools',
         ]
