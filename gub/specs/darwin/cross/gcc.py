@@ -3,6 +3,7 @@ import os
 from gub.specs.cross import gcc as cross_gcc
 from gub import loggedos
 from gub import cross
+from gub import misc
 
 class Gcc__darwin (cross_gcc.Gcc):
     source = 'ftp://ftp.fu-berlin.de/unix/languages/gcc/releases/gcc-4.1.1/gcc-4.1.1.tar.bz2'
@@ -57,6 +58,10 @@ class Gcc__darwin__x86 (Gcc__darwin):
     dependencies = Gcc__darwin.dependencies + ['tools::mpfr']
     configure_command = (''' LDFLAGS='-L%(tools_prefix)s/lib %(rpath)s' '''
                          + Gcc__darwin.configure_command)
+    configure_variables = (Gcc__darwin.configure_variables
+                + misc.join_lines ('''
+MAKEINFO=no
+'''))
 
 class Version_bump_builds_but_needs_a_test_Gcc__darwin__ppc (Gcc__darwin__x86):
     pass

@@ -10,3 +10,7 @@ class Gcc__freebsd (cross_gcc.Gcc):
                 + misc.join_lines ('''
 --program-prefix=%(toolchain_prefix)s
 '''))
+    configure_variables = (cross_gcc.Gcc.configure_variables 
+                + misc.join_lines ('''
+MAKEINFO=no
+'''))
