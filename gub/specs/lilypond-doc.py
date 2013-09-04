@@ -23,7 +23,7 @@ WEB_TARGETS="offline online"
 TARGET_PYTHON=/usr/bin/python
 CPU_COUNT=%(cpu_count)s
 ''')
-    compile_flags = lilypond.LilyPond_base.compile_flags + ' top-doc all doc'
+    compile_flags = lilypond.LilyPond_base.compile_flags + ' top-doc doc'
     install_flags = (' install-doc install-help2man'
                      ' prefix='
                      ' infodir=/share/info'
