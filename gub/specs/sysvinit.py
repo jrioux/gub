@@ -1,3 +1,4 @@
+from gub import misc
 from gub import target
 
 class Sysvinit (target.MakeBuild):

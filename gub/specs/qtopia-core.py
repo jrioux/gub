@@ -8,12 +8,14 @@ from gub import target
 
 class Qtopia_core (target.AutoBuild):
     source = 'ftp://ftp.trolltech.com/qt/source/qtopia-core-opensource-src-4.2.2.tar.gz'
-    dict = {
-        'CC': 'gcc',
-        'CXX': 'g++',
-        #'LINK': '%(toolchain_prefix)sg++',
+    def __init__ (self, settings, source):
+        target.AutoBuild.__init__ (self, settings, source)
+        self.compile_dict = {
+            'CC': 'gcc',
+            'CXX': 'g++',
+            #'LINK': '%(toolchain_prefix)sg++',
         }
-    build.change_dict (self, dict)
+        build.change_dict (self, self.compile_dict)
     dependencies = ['freetype-devel', 'tslib-devel']
     def patch (self):
         self.file_sub ([('pkg-config', '$PKG_CONFIG')],
