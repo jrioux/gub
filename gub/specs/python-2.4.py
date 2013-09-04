@@ -77,6 +77,7 @@ class Python_2_4 (target.AutoBuild):
         target.AutoBuild.configure (self)
         self.file_sub ([
                 ('^CCSHARED=.*', 'CCSHARED = -fPIC'),
+                ('^CFLAGSFORSHARED=.*', 'CFLAGSFORSHARED = -fPIC'),
                 ('^LDSHARED=.*', 'LDSHARED = $(CC) -shared -fPIC'),
                 ('BLDSHARED=.*', 'BLDSHARED = $(CC) -shared -fPIC -L. -lpython%(python_version)s'),
                 ('^BLDLIBRARY=.*', 'BLDLIBRARY = %(rpath)s -L. -lpython$(VERSION)'),

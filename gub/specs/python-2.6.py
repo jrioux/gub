@@ -22,6 +22,7 @@ class Python_2_6 (python.Python_2_4):
         ]
     patches = [
         'python-2.6.4.patch',
+        'python-2.6.4-hashlib.patch',
         'python-configure.in-posix.patch&strip=0',
         'python-2.6.4-configure.in-sysname.patch',
         'python-2.4.2-configure.in-sysrelease.patch',
@@ -97,6 +98,7 @@ class Python_2_6__freebsd (Python_2_6):
 
 class Python_2_6__tools (tools.AutoBuild, Python_2_6):
     patches = [
+        'python-2.6.4-hashlib.patch',
         'python-2.6.4-readline.patch',
         'python-2.6.4-setup-cross.patch',
         ]
