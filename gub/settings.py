@@ -9,7 +9,7 @@ from gub import context
 from gub import misc
 from gub import sources
 from gub import loggedos
-from gub import logging
+from gub import gub_log
 
 platforms = {
     'debian': 'i686-linux',
@@ -167,7 +167,7 @@ class Settings (context.Context):
         self.uploads = self.workdir_prefix + '/uploads'
         self.platform_uploads = self.uploads + '/' + self.platform
 
-        info = logging.default_logger.harmless
+        info = gub_log.default_logger.harmless
         info.write ('\n')
         info.write ('SYSTEM_ROOT=%(system_root)s\n' % self.__dict__)
         info.write ('SYSTEM_PREFIX=%(system_prefix)s\n' % self.__dict__)
@@ -234,7 +234,7 @@ class Settings (context.Context):
                 self.build_hardware_bits = '64'
         except:
             try:
-                cpu = misc.read_pipe ('sysctl -b hw.machine', logger=logging.default_logger.harmless)
+                cpu = misc.read_pipe ('sysctl -b hw.machine', logger=gub_log.default_logger.harmless)
                 if cpu in ('amd64', 'ia64'):
                     self.build_hardware_bits = '64'
             except:
@@ -282,7 +282,7 @@ class Settings (context.Context):
             ):
             dir = self.__dict__[a]
             if not os.path.isdir (dir):
-                loggedos.makedirs (logging.default_logger, dir)
+                loggedos.makedirs (gub_log.default_logger, dir)
 
     def dependency_url (self, string):
         # FIXME: read from settings.rc, take platform into account

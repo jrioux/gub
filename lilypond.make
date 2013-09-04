@@ -9,6 +9,7 @@
 .PHONY: lilypond-upload
 
 default: all
+	$(info **** Default rule)
 
 LILYPOND_BRANCH=master
 BUILDSCRIPTS=scripts/build
@@ -70,9 +71,6 @@ include gub.make
 NATIVE_TARGET_DIR=$(CWD)/target/$(BUILD_PLATFORM)
 TOOLS_BIN_DIR=$(CWD)/target/tools/root/usr/bin/
 
-#FIXME: we cannot use python from tools, because of the gub/logging.py
-#       name clash.  Todo: rename gub/logging.py -- triggers full
-#       rebuild.  Not using tools means: we depend on /usr/bin/makeinfo
 SET_TOOLS_PATH=PATH=$(CWD)/target/tools/root/usr/bin:$(PATH)
 
 LILYPOND_VERSIONS = versiondb/lilypond.versions
@@ -82,6 +80,7 @@ include compilers.make
 ################
 
 unlocked-update-versions:
+	$(info **** unlocked-update-versions rule)
 	python gub/versiondb.py --version-db=$(LILYPOND_VERSIONS) --download --platforms="$(PLATFORMS)"
 
 ifneq ($(findstring cygwin,$(PLATFORMS)),)
@@ -94,6 +93,7 @@ ifneq ($(findstring cygwin,$(PLATFORMS)),)
 endif
 
 download-cygwin:
+	$(info **** download-cygwin rule)
 	$(MAKE) downloads/genini
 	rm -f target/*/status/lilypond*
 	rm -f log/lilypond-$(LILYPOND_VERSION)*.*.test.pdf
@@ -103,13 +103,16 @@ download-cygwin:
 
 ## same command as  lilypond.versions:
 update-versions:
+	$(info **** update-versions rule)
 	$(PYTHON) gub/with-lock.py --skip $(LILYPOND_VERSIONS).lock $(MAKE) unlocked-update-versions
 
 ## same command as  update-versions:
 $(LILYPOND_VERSIONS):
+	$(info **** LILYPOND_VERSIONS rule)
 	$(PYTHON) gub/with-lock.py --skip $(LILYPOND_VERSIONS).lock $(MAKE) unlocked-update-versions
 
 regtests/ignore:
+	$(info **** regtests/ignore rule)
 	@echo 
 	@echo 
 	@echo "******************************************************"
@@ -125,27 +128,35 @@ regtests/ignore:
 	exit 1
 
 nongit-dirs:
+	$(info **** nongit-dirs rule)
 	mkdir -p versiondb regtests uploads
 
 lilypond-prep: nongit-dirs $(LILYPOND_VERSIONS) regtests/ignore
+	$(info **** lilypond-prep rule)
 
 all: lilypond-prep packages rest
+	$(info **** all rule)
 
 ifeq ($(findstring mingw, $(PLATFORMS)),mingw)
 rest: nsis
 endif
 
 rest: lilypond-installers test doc doc-export print-success
+	$(info **** rest rule)
 
 test: dist-check test-output test-export
+	$(info **** test rule)
 
 doc:
+	$(info **** doc rule)
 	$(call INVOKE_GUB,$(BUILD_PLATFORM) --offline) $(DOC_PACKAGE)
 
 test-output:
+	$(info **** test-output rule)
 	$(call INVOKE_GUB,$(BUILD_PLATFORM) --offline) $(TEST_PACKAGE)
 
 print-success:
+	$(info **** print-success rule)
 	python test-lily/upload.py --branch=$(LILYPOND_BRANCH) --url $(LILYPOND_REPO_URL)
 	@echo ""
 	@echo "To upload, run:"
@@ -157,26 +168,33 @@ docball = uploads/lilypond-$(DIST_VERSION)-$(DOC_BUILDNUMBER).documentation.tar.
 webball = uploads/lilypond-$(DIST_VERSION)-$(DOC_BUILDNUMBER).webdoc.tar.bz2
 
 $(docball):
+	$(info **** docball rule)
 #keep this target and just move/repackage lilypond-doc.gup,
 #easier to handle versions.db?
 	$(MAKE) doc
 
 upload-setup-ini:
+	$(info **** upload-setup-ini rule)
 	cd uploads/cygwin && ../../downloads/genini $$(find release -mindepth 1 -maxdepth 2 -type d) > setup.ini
 
 downloads/genini:
+	$(info **** downloads/genini rule)
 	wget --output-document $@ 'http://cygwin.com/cgi-bin/cvsweb.cgi/~checkout~/genini/genini?rev=1.2&content-type=text/plain&cvsroot=cygwin-apps&only_with_tag=HEAD'
 	chmod +x $@
 
 lily-clean:
+	$(info **** lily-clean rule)
 	rm -rf target/$(BUILD_PLATFORM)/*/lilypond-$(LILYPOND_FLATTENED_BRANCH)*
 
 lily-doc-clean:	doc-clean
+	$(info **** lily-doc-clean rule)
 
 clean:
+	$(info **** clean rule)
 	rm -rf $(foreach p, $(PLATFORMS), target/*$(p)* )
 
 realclean:
+	$(info **** realclean rule)
 	rm -rf $(foreach p, $(PLATFORMS), uploads/$(p)/* uploads/$(p)-cross/* target/*$(p)* )
 
 ################################################################
@@ -185,9 +203,11 @@ realclean:
 tools := $(shell PATH=$(PATH) $(GUB) --show-dependencies $(foreach p, $(PLATFORMS), $(p)::lilypond $(p)::lilypond-doc $(p)::lilypond-installer) 2>&1 | grep ^dependencies | tr ' ' '\n' | grep 'tools::')
 
 ptools:
+	$(info **** ptools rule)
 	$(GUB) --show-dependencies $(foreach p, $(PLATFORMS), $(p)::lilypond $(p)::lilypond-doc $(p)::lilypond-installer) 2>&1 | grep ^dependencies | tr ' ' '\n' | grep 'tools::'
 
 nsis:
+	$(info **** nsis rule)
 	bin/gub tools::nsis
 
 ################################################################
@@ -204,14 +224,18 @@ NATIVE_LILY_SRC=$(NATIVE_TARGET_DIR)/src/lilypond-$(LILYPOND_FLATTENED_BRANCH)
 # repository.read_file(), I guess.
 LILYPOND_REPO_DIR=downloads/lilypond
 LILYPOND_REPO_BRANCH_DIR=$(LILYPOND_REPO_DIR)/$(dir $(LILYPOND_DIRRED_BRANCH))
-NATIVE_BUILD_COMMITTISH=$(shell cat $(LILYPOND_REPO_BRANCH_DIR)/refs/heads/$(LILYPOND_DIRRED_BRANCH))
+NATIVE_BUILD_COMMITTISH=$(shell cat $(LILYPOND_REPO_DIR)/git/refs/heads/$(LILYPOND_DIRRED_BRANCH))
 
 print:
-	@echo LDB $(LILYPOND_DIRRED_BRANCH)
-	@echo LFB  $(LILYPOND_FLATTENED_BRANCH)
-	@echo $(BUILD_PACKAGE)
-	@echo $(DOC_PACKAGE)
-	@echo $(TEST_PACKAGE)
+	$(info **** print rule)
+	@echo LILYPOND_DIRRED_BRANCH $(LILYPOND_DIRRED_BRANCH)
+	@echo LILYPOND_FLATTENED_BRANCH  $(LILYPOND_FLATTENED_BRANCH)
+	@echo BUILD_PACKAGE $(BUILD_PACKAGE)
+	@echo DOC_PACKAGE $(DOC_PACKAGE)
+	@echo TEST_PACKAGE $(TEST_PACKAGE)
+	@echo NATIVE_BUILD_COMMITTISH $(NATIVE_BUILD_COMMITTISH)
+	@echo LILYPOND_REPO_BRANCH_DIR $(LILYPOND_REPO_BRANCH_DIR)
+	@echo LILYPOND_REPO_DIR $(LILYPOND_REPO_DIR)
 
 DIST_VERSION=$(shell cat $(NATIVE_LILY_BUILD)/out/VERSION)
 DOC_BUILDNUMBER=$(shell $(PYTHON) gub/versiondb.py --platforms=$(PLATFORMS) --build-for=$(DIST_VERSION))
@@ -219,12 +243,15 @@ DOC_BUILDNUMBER=$(shell $(PYTHON) gub/versiondb.py --platforms=$(PLATFORMS) --bu
 SIGNATURE_FUNCTION=uploads/signatures/$(1).$(NATIVE_BUILD_COMMITTISH)
 
 doc-clean:
+	$(info **** doc-clean rule)
 	$(PYTHON) gub/with-lock.py --skip $(DOC_LOCK) $(MAKE) unlocked-doc-clean
 
 test-clean:
+	$(info **** test-clean rule)
 	$(PYTHON) gub/with-lock.py --skip $(TEST_LOCK) $(MAKE) unlocked-test-clean
 
 unlocked-doc-clean:
+	$(info **** unlocked-doc-clean rule)
 	make -C $(NATIVE_TARGET_DIR)/build/lilypond-$(LILYPOND_FLATTENED_BRANCH) \
 		DOCUMENTATION=yes doc-clean
 	rm -rf $(NATIVE_TARGET_DIR)/build/lilypond-$(LILYPOND_FLATTENED_BRANCH)/out/lybook-db
@@ -232,11 +259,13 @@ unlocked-doc-clean:
 	rm -f $(call SIGNATURE_FUNCTION,cached-doc-export)
 
 unlocked-test-clean:
+	$(info **** unlocked-test-clean rule)
 	make -C $(NATIVE_TARGET_DIR)/build/lilypond-$(LILYPOND_FLATTENED_BRANCH) \
 		DOCUMENTATION=yes test-clean
 	rm -f $(call SIGNATURE_FUNCTION,cached-test-output)
 
 cached-dist-check cached-doc-export cached-test-export:
+	$(info **** $@ rule)
 	-mkdir -p uploads/signatures
 	if test ! -f  $(call SIGNATURE_FUNCTION,$@) ; then \
 		$(SET_TOOLS_PATH) \
@@ -244,6 +273,7 @@ cached-dist-check cached-doc-export cached-test-export:
 		&& touch $(call SIGNATURE_FUNCTION,$@) ; fi
 
 unlocked-doc-export:
+	$(info **** unlocked-doc-export rule)
 	PYTHONPATH=$(NATIVE_LILY_BUILD)/python/out \
 	$(PYTHON) test-lily/rsync-lily-doc.py --recreate \
 		--version-file=$(NATIVE_LILY_BUILD)/out/VERSION \
@@ -254,6 +284,7 @@ unlocked-doc-export:
 		--output-distance=$(NATIVE_LILY_SRC)/$(BUILDSCRIPTS)/output-distance.py $(NATIVE_LILY_BUILD)/out-www/offline-root
 
 unlocked-test-export:
+	$(info **** unlocked-test-export rule)
 	mkdir -p uploads/webtest
 	PYTHONPATH=$(NATIVE_LILY_BUILD)/python/out \
 	$(SET_TOOLS_PATH) \
@@ -263,14 +294,17 @@ unlocked-test-export:
 		--test-dir=uploads/webtest
 
 doc-export:
+	$(info **** doc-export rule)
 	$(SET_TOOLS_PATH) \
 		$(PYTHON) gub/with-lock.py --skip $(DOC_LOCK) $(MAKE) cached-doc-export
 
 test-export:
+	$(info **** test-export rule)
 	$(SET_TOOLS_PATH) \
 		$(PYTHON) gub/with-lock.py --skip $(DOC_LOCK) $(MAKE) cached-test-export
 
 unlocked-dist-check:
+	$(info **** unlocked-dist-check rule)
 	$(SET_TOOLS_PATH) \
 		$(PYTHON) test-lily/dist-check.py\
 		--branch=$(LILYPOND_BRANCH) \
@@ -279,16 +313,19 @@ unlocked-dist-check:
 	cp $(NATIVE_LILY_BUILD)/out/lilypond-$(DIST_VERSION).tar.gz uploads
 
 dist-check:
+	$(info **** dist-check rule)
 	$(SET_TOOLS_PATH) \
 		$(PYTHON) gub/with-lock.py --skip $(NATIVE_LILY_BUILD).lock \
 		$(MAKE) cached-dist-check
 
 print-branches:
+	$(info **** print-branches rule)
 	@echo "--branch=guile=$(GUILE_FLATTENED_BRANCH)"
 	@echo "--branch=lilypond=$(LILYPOND_FLATTENED_BRANCH)"
 	@echo "--branch=denemo=$(DENEMO_FLATTENED_BRANCH)"
 
 lilypond-upload:
+	$(info **** lilypond-upload rule)
 	$(PYTHON) test-lily/upload.py --branch=$(LILYPOND_BRANCH) --url $(LILYPOND_REPO_URL) --execute
 	mv uploads/lilypond-*.test-output.tar.bz2 regtests/
 

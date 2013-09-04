@@ -159,15 +159,17 @@ py_done:
 	ReadRegStr $R0 HKCR "Python\shell\open\command" ""
 	;;StrCmp $R0 "" 0 py_auto_file
 	WriteRegStr HKCR "Python\shell" "" "open"
-	# %1 is the PYTHON command, so must be quoted bo the space
-	WriteRegExpandStr HKCR "Python\shell\open\command" "" '"$INSTDIR\usr\bin\python.exe" "%1" %2 %3 %4 %5 %6 %7 %8 %9'
+	# %1 is the PYTHON command, other arguments may contain
+	# filenames, so we quote them all to account for spaces
+	WriteRegExpandStr HKCR "Python\shell\open\command" "" '"$INSTDIR\usr\bin\python.exe" "%1" "%2" "%3" "%4" "%5" "%6" "%7" "%8" "%9"'
 
 ;;py_auto_file:
 	ReadRegStr $R0 HKCR "py_auto_file\shell\open\command" ""
 	;;StrCmp $R0 "" 0 py_end
 	WriteRegStr HKCR "py_auto_file\shell" "" "open"
-	# %1 is the PYTHON command, so must be quoted bo the space
-	WriteRegExpandStr HKCR "py_auto_file\shell\open\command" "" '"$INSTDIR\usr\bin\python.exe" "%1" %2 %3 %4 %5 %6 %7 %8 %9'
+	# %1 is the PYTHON command, other arguments may contain
+	# filenames, so we quote them all to account for spaces
+	WriteRegExpandStr HKCR "py_auto_file\shell\open\command" "" '"$INSTDIR\usr\bin\python.exe" "%1" "%2" "%3" "%4" "%5" "%6" "%7" "%8" "%9"'
 ;;py_end:	
 FunctionEnd
 

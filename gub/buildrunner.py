@@ -31,7 +31,7 @@ from gub import build
 from gub import misc
 from gub import gup
 from gub import loggedos
-from gub import logging
+from gub import gub_log
 from gub import runner
 import gub.settings   # otherwise naming conflict with settings local vars.
 
@@ -45,7 +45,7 @@ def checksum_diff (a, b, fromfile='', tofile='',
                                             fromfiledate,
                                             tofiledate))
 
-logger = logging.default_logger
+logger = gub_log.default_logger
 
 # FIXME s/spec/build/, but we also have two definitions of package/pkg
 # here: sub packages and name of global package under build
@@ -53,7 +53,7 @@ logger = logging.default_logger
 #FIXME: split spec_* into SpecBuiler?
 class BuildRunner:
     def __init__ (self, manager, settings, options, specs):
-        info = logging.default_logger.harmless
+        info = gub_log.default_logger.harmless
         info.write ('MANAGER: ' + settings.platform + '\n')
         self.managers = {settings.platform : manager }
         self.settings = settings
@@ -74,7 +74,7 @@ class BuildRunner:
 
     def manager (self, platform):
         if platform not in self.managers:
-            info = logging.default_logger.harmless
+            info = gub_log.default_logger.harmless
             info.write ('MANAGER for platform: ' + platform + '\n')
             settings = gub.settings.Settings (platform)
             self.managers[platform] = gup.DependencyManager (settings.system_root)
@@ -88,10 +88,10 @@ class BuildRunner:
                 self.manager (package.platform ()).register_package_dict (package.dict ())
 
     def calculate_checksums (self):
-        logging.verbose ('calculating checksums\n')
+        gub_log.verbose ('calculating checksums\n')
         for spec in list (self.specs.values ()):
             name = spec.platform_name ()
-            logger = logging.NullCommandLogger ()
+            logger = gub_log.NullCommandLogger ()
 
             command_runner = runner.DeferredRunner (logger)
             spec.connect_command_runner (command_runner)
@@ -227,7 +227,7 @@ class BuildRunner:
         global logger
         if self.options.log == 'build':
             # This is expecially broken with multi-platform builds...
-            logger = logging.default_logger
+            logger = gub_log.default_logger
         else:
             if self.options.log == 'platform':
                 log = os.path.join (spec.settings.logdir, 'build.log')
@@ -236,7 +236,7 @@ class BuildRunner:
                                     misc.strip_platform (spec_name)) + '.log'
             if os.path.isfile (log):
                 misc.rename_append_time (log)
-            logger = logging.CommandLogger (log, logging.default_logger.threshold)
+            logger = gub_log.CommandLogger (log, gub_log.default_logger.threshold)
         if checksum_fail_reason:
             rebuild = 'must'
             if self.options.lax_checksums:
@@ -245,7 +245,7 @@ class BuildRunner:
         else:
             logger.write_log ('checksum ok: %(spec_name)s\n' % locals (), 'verbose')
 
-        if logging.get_numeric_loglevel ('verbose') > logger.threshold:
+        if gub_log.get_numeric_loglevel ('verbose') > logger.threshold:
             logger.write_log ('\n'.join (checksum_fail_reason.split ('\n')[:10]), 'verbose')
         logger.write_log (checksum_fail_reason, 'output')
 
@@ -269,12 +269,12 @@ class BuildRunner:
                 if os.path.isfile (checksum_file):
                     misc.rename_append_time (checksum_file)
                 open (checksum_file, 'w').write (self.checksums[spec_name])
-            loggedos.system (logging.default_logger, spec.expand ('rm -f %(stamp_file)s'))
+            loggedos.system (gub_log.default_logger, spec.expand ('rm -f %(stamp_file)s'))
         # Ugh, pkg_install should be stage
         if spec.install_after_build and not self.spec_all_installed (spec):
             logger.write_log (spec.stage_message ('pkg_install'), 'stage')
             self.spec_install (spec)
-        logging.default_logger.write_log ('\n', 'stage')
+        gub_log.default_logger.write_log ('\n', 'stage')
 
     def is_installed_spec (self, spec_name):
         spec = self.specs[spec_name]
@@ -317,7 +317,7 @@ class BuildRunner:
                     .replace (misc.with_platform ('', platform), ''))
         if not fail_str:
             fail_str = '<nothing to be done>.'
-        logging.default_logger.write_log ('must rebuild[%(platform)s]: %(fail_str)s\n' % locals (), 'stage')
+        gub_log.default_logger.write_log ('must rebuild[%(platform)s]: %(fail_str)s\n' % locals (), 'stage')
         if self.options.dry_run:
             sys.exit (0)
         outdated_installed = [x for x in list (reversed (outdated))
@@ -326,13 +326,13 @@ class BuildRunner:
             platform = self.settings.platform
             outdated_str = (' '.join (outdated_installed)
                             .replace (misc.with_platform ('', platform), ''))
-            logging.default_logger.write_log ('removing outdated[%(platform)s]: %(outdated_str)s\n' % locals (), 'stage')
+            gub_log.default_logger.write_log ('removing outdated[%(platform)s]: %(outdated_str)s\n' % locals (), 'stage')
             self.uninstall_specs (outdated_installed)
         global target
         for spec_name in deps:
             target = spec_name
             self.spec_build (spec_name)
-            logger = logging.default_logger
+            logger = gub_log.default_logger
         target = None
 
 target = None

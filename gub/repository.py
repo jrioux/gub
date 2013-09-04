@@ -42,7 +42,7 @@ from gub.db import db
 from gub import misc
 from gub import locker
 from gub import tztime
-from gub import logging
+from gub import gub_log
 from gub import loggedos
 
 class UnknownVcSystem (Exception):
@@ -158,7 +158,7 @@ class Repository:
     def __init__ (self, dir, source):
         self.settings = None
         self.source = source
-        self.logger = logging.default_logger
+        self.logger = gub_log.default_logger
         self.system = self.logged_indirection (loggedos.system)
         self._read_file = self.logged_indirection (loggedos.read_file)
         self.download_url = self.logged_indirection (loggedos.download_url)

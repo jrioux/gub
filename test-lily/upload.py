@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 maintainer = "graham"
-maintainer_git_username = "gpercival"
+maintainer_git_username = "philholmes"
 
 ## interaction with lp.org down/upload area.
 
@@ -265,6 +265,7 @@ def main ():
     if options.execute:
         cmds = [c for c in cmds if 'test-binary' not in c]
         for cmd in cmds:
+            print (cmd)
             system (cmd)
     else:
         printf ('\n\n')

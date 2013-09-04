@@ -8,7 +8,7 @@ from gub import commands
 from gub import context
 from gub import guppackage
 from gub import loggedos
-from gub import logging
+from gub import gub_log
 from gub import misc
 from gub import octal
 
@@ -66,7 +66,7 @@ tooldir=%(install_prefix)s
         context.RunnableContext.__init__ (self, settings)
         self.source = source
         self.settings = settings
-        self.source.connect_logger (logging.default_logger)
+        self.source.connect_logger (gub_log.default_logger)
         if self.destdir_install_broken:
             self.install_command = 'make %(make_flags)s %(install_flags_destdir_broken)s %(install_flags)s'
 
@@ -137,7 +137,7 @@ to force a full package rebuild, or
 
 to skip this check and risk a defective build.
 ''')
-                logging.error (msg)
+                gub_log.error (msg)
                 self.system ('false')
             try:
                 (available[stage]) ()
@@ -239,7 +239,7 @@ class AutoBuild (Build):
 
     def download (self):
         if not self.source.is_downloaded ():
-            logging.default_logger.write_log (self.stage_message ('download'),
+            gub_log.default_logger.write_log (self.stage_message ('download'),
                                                                   'stage')
         self.source.download ()
 

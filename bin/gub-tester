@@ -23,7 +23,7 @@ import time
 from gub.syntax import printf
 from gub import misc
 from gub import repository
-from gub import logging
+from gub import gub_log
 from gub.db import bsd as db_bsd
 
 def canonicalize_string (target):
@@ -217,7 +217,7 @@ def test_target (repo, options, target, last_patch):
     tag_db = repository.TagDb (options.result_dir)
     recheck = ''
     if release_hash in done_db:
-        logging.info ('release %(release_hash)s has already been checked\n'
+        gub_log.info ('release %(release_hash)s has already been checked\n'
                       % locals ())
         if not options.force:
             RESULT = CACHED_SUCCESS
@@ -225,20 +225,20 @@ def test_target (repo, options, target, last_patch):
                 RESULT = CACHED_FAIL
             return RESULT, ['cached %(RESULT)s of %(release_hash)s' % locals ()]
         recheck = ' (forced recheck of %(release_hash)s)' % locals ()
-        logging.info ('recheck forced\n' % locals ())
+        gub_log.info ('recheck forced\n' % locals ())
     
     log = 'test-%(canonicalize)s.log' %  locals ()
     log = os.path.join (options.result_dir, log)
     
     cmd = 'nice time sh -c "(%(target)s)"' % locals ()
-    logging.command (cmd + '\n')
-    logging.error ('Logging test output to %(log)s\n' % locals ())
+    gub_log.command (cmd + '\n')
+    gub_log.error ('Logging test output to %(log)s\n' % locals ())
 
     if options.dry_run:
         return (SUCCESS, ['dryrun'])
 
-    logging.set_default_log (log, options.verbosity)
-    logger = logging.default_logger
+    gub_log.set_default_log (log, options.verbosity)
+    logger = gub_log.default_logger
     stat = loggedos.system (logger, cmd, ignore_errors=True)
     base_tag = 'success-%(canonicalize)s-' % locals ()
     result = 'unknown'
@@ -261,7 +261,7 @@ def test_target (repo, options, target, last_patch):
         tag_db.tag (base_tag, repo)
         if repo.is_distributed ():
             tag = repo.tag (base_tag)
-            logging.action ('tagging with %(tag)s\n' % locals ())
+            gub_log.action ('tagging with %(tag)s\n' % locals ())
             if options.tag_repo:
                 repo.push (tag, options.tag_repo)
 
@@ -275,13 +275,13 @@ def test_target (repo, options, target, last_patch):
     attachments = [message % locals ()]
     if diff:
         attachments.append (diff)
-    logging.info ('%(target)s: %(RESULT)s\n' % locals ())
+    gub_log.info ('%(target)s: %(RESULT)s\n' % locals ())
     done_db[release_hash] = time.ctime () + ' ' + RESULT
     return (RESULT, attachments)
     
 def send_message (options, msg):
     if not options.address:
-        logging.info ('No recipients for result mail\n')
+        gub_log.info ('No recipients for result mail\n')
         # FIXME: what about env[EMAIL]?
         return False
     
@@ -311,9 +311,9 @@ def real_main (options, args, handle_result):
     if options.dry_run:
         log = '/dev/stdout'
 
-    logging.set_default_log (log, options.verbosity)
-    logging.info (' *** %s\n' % time.ctime ())
-    logging.info (' *** Starting tests:\n %s\n' % '\n  '.join (args))
+    gub_log.set_default_log (log, options.verbosity)
+    gub_log.info (' *** %s\n' % time.ctime ())
+    gub_log.info (' *** Starting tests:\n %s\n' % '\n  '.join (args))
 
     repo = repository.get_repository_proxy (options.repository,
                                             options.url,
@@ -324,7 +324,7 @@ def real_main (options, args, handle_result):
         repo.download ()
         repo.update_workdir ('.')
 
-    logging.info ('Repository %s\n' % str (repo))
+    gub_log.info ('Repository %s\n' % str (repo))
     
     last_patch = repo.get_revision_description ()
     release_hash = repo.get_checksum ()
@@ -405,7 +405,7 @@ def main ():
     p = opt_parser ()
     (options, args) = p.parse_args ()
     if not args:
-        logging.error ('error: nothing to do\n')
+        gub_log.error ('error: nothing to do\n')
         p.print_help ()
         sys.exit (2)
 

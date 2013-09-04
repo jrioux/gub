@@ -44,7 +44,7 @@ from gub import configure
 from gub import cross
 from gub import gup
 from gub import locker
-from gub import logging
+from gub import gub_log
 from gub import misc
 from gub import repository
 from gub.syntax import printf
@@ -166,7 +166,7 @@ def inspect (settings, files):
 
 #FIXME: move to BuildRunner?
 def build (settings, options, files):
-    logging.stage ('calculating dependencies\n')
+    gub_log.stage ('calculating dependencies\n')
     (names, specs) = gup.get_source_packages (settings, files)
     if options.no_dependencies:
         names = list ()
@@ -182,13 +182,13 @@ def build (settings, options, files):
         printf ('dependencies[%(platform)s]: %(dep_str)s' % locals ())
         sys.exit (0)
     dep_str.replace (misc.with_platform ('', platform), '')
-    logging.info ('dependencies[%(platform)s]: %(dep_str)s\n' % locals ())
+    gub_log.info ('dependencies[%(platform)s]: %(dep_str)s\n' % locals ())
 
     if options.fresh:
         for spec in list (specs.values()):
             status = spec.get_stamp_file ()
             if os.path.exists (status):
-                logging.info ('Removing status file: %(status)s\n' % locals ())
+                gub_log.info ('Removing status file: %(status)s\n' % locals ())
                 os.unlink (status)
 
     if options.download_only:
@@ -208,7 +208,7 @@ def build (settings, options, files):
         manager = gup.DependencyManager (settings.system_root)
         ## Todo: have a readonly lock for tools platform
     except locker.LockedError:
-        logging.error ('another build in progress.  Skipping.')
+        gub_log.error ('another build in progress.  Skipping.')
         if options.skip_if_locked:
             sys.exit (0)
         raise
@@ -224,7 +224,7 @@ def build (settings, options, files):
             printf (b.checksums[name])
         sys.exit (0)
         
-    configure.test_required (logging.default_logger.error)
+    configure.test_required (gub_log.default_logger.error)
 
     b.build_source_packages (names)
 
@@ -268,7 +268,7 @@ def logged_build (settings, options, files):
     log = os.path.join (log_dir, 'gub.log')
     if os.path.isfile (log):
         misc.rename_append_time (log)
-    logger = logging.set_default_log (log, options.verbosity)
+    logger = gub_log.set_default_log (log, options.verbosity)
     buildrunner.logger = logger
     logger.write_log ('root: %s\n' % settings.system_root, 'verbose')
     logger.write_log ('platform: %s\n' % settings.platform, 'verbose')
@@ -331,9 +331,9 @@ def main ():
     if options.dry_run:
         loggedos.dry_run ()
 
-    logging.default_logger.threshold = options.verbosity
-    logging.info ('files: %(files)s\n' % locals ())
-    logging.info ('CLEANED env: ' + str (os.environ) + '\n')
+    gub_log.default_logger.threshold = options.verbosity
+    gub_log.info ('files: %(files)s\n' % locals ())
+    gub_log.info ('CLEANED env: ' + str (os.environ) + '\n')
 
     if not options.platform and len (files):
         options.platform, x = misc.split_platform (files[0])
@@ -345,7 +345,7 @@ def main ():
         sys.exit (0)
 
     if not files:
-        logging.error ('error: nothing to do\n')
+        gub_log.error ('error: nothing to do\n')
         cli_parser.print_help ()
         sys.exit (2)
         

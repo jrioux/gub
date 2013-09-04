@@ -17,7 +17,7 @@ import optparse
 import sys
 #
 from gub.syntax import printf
-from gub import logging
+from gub import gub_log
 from gub import loggedos
 
 """
@@ -129,12 +129,12 @@ def main ():
     
     os.system ('mkdir -p log')
     if options.dry_run:
-        options.verbosity = logging.get_numeric_loglevel ('command')
+        options.verbosity = gub_log.get_numeric_loglevel ('command')
         
-    logging.set_default_log ('log/cron-builder.log', options.verbosity)
-    logger = logging.default_logger
+    gub_log.set_default_log ('log/cron-builder.log', options.verbosity)
+    logger = gub_log.default_logger
     
-    logging.info (' *** Starting cron-builder:\n  %s ' % '\n  '.join (args)) 
+    gub_log.info (' *** Starting cron-builder:\n  %s ' % '\n  '.join (args)) 
 
     if options.clean:
         # FIXME: what if user changes ~/.gubrc?  should use gubb.Settings!

@@ -123,7 +123,7 @@ bjam
 --libdir=%(prefix_dir)s/lib
 --includedir=%(prefix_dir)s/include
 --verbose
-'''
+''')
     install_command = (compile_command
                        .replace ('=%(prefix_dir)s', '=%(install_prefix)s')
                        + ' install')

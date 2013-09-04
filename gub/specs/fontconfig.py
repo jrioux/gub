@@ -2,7 +2,7 @@ import os
 #
 from gub import build
 from gub import context
-from gub import logging
+from gub import gub_log
 from gub import misc
 from gub import octal
 from gub import target
@@ -52,7 +52,7 @@ specified by applications.'''
         # of freetype.
         base_config_cmd = self.settings.expand ('%(tools_prefix)s/bin/freetype-config')
         cmd =  base_config_cmd + ' --cflags'
-        logging.command ('pipe %s\n' % cmd)
+        gub_log.command ('pipe %s\n' % cmd)
         # ugh, this is utterly broken.  we're reading from the
         # filesystem init time, when freetype-config does not exist
         # yet.
@@ -62,7 +62,7 @@ specified by applications.'''
     def freetype_libs (self):
         base_config_cmd = self.settings.expand ('%(tools_prefix)s/bin/freetype-config')
         cmd =  base_config_cmd + ' --libs'
-        logging.command ('pipe %s\n' % cmd)
+        gub_log.command ('pipe %s\n' % cmd)
         # return misc.read_pipe (cmd).strip ()
         return '-lfreetype -lz'
     def configure (self):

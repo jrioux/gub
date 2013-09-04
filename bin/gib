@@ -42,7 +42,7 @@ from gub import installer
 import gub.settings
 
 from gub import locker
-from gub import logging
+from gub import gub_log
 from gub import runner
 from gub import versiondb
 
@@ -123,7 +123,7 @@ def check_installer (installer, options, args):
          for p in install_manager.installed_packages ()])
 
 def build_installer (installer_obj):
-    logger = logging.default_logger
+    logger = gub_log.default_logger
 
     # theoretically, we could run DeferredRunner but we would have to
     # CommandRunner-ify PackageManager too. - that does not seem worth
@@ -160,26 +160,26 @@ def main ():
     for s in options.settings:
         (k, v) = tuple (s.split ('='))
         if k in settings.__dict__:
-            logging.warn ('overwriting %s = %s with %s\n'
+            gub_log.warn ('overwriting %s = %s with %s\n'
                                         % (k, settings.__dict__[k], v))
         settings.__dict__[k] = v
 
     db = versiondb.VersionDataBase (options.version_db)
     branch_dict = dict ([tuple (branch_setting.split ('='))
                          for branch_setting in options.branches])
-    log = logging.set_default_log (settings.expand ('%(logdir)s/installer.log'),
+    log = gub_log.set_default_log (settings.expand ('%(logdir)s/installer.log'),
                                    options.verbosity)
 
     installer_obj = installer.get_installer (settings, args, db, branch_dict)
     try:
         build_installer (installer_obj)
     except locker.LockedError:
-        logging.error ('another build in progress.  Skipping.')
+        gub_log.error ('another build in progress.  Skipping.')
         if options.skip_if_locked:
             sys.exit (0)
         raise
-    logging.stage ('done\n')
-    logging.default_logger.show_logfile ()
+    gub_log.stage ('done\n')
+    gub_log.default_logger.show_logfile ()
 
 if __name__ == '__main__':
     main ()

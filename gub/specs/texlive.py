@@ -2,7 +2,7 @@ import os
 #
 from gub.syntax import printf
 from gub import context
-from gub import logging
+from gub import gub_log
 from gub import loggedos
 from gub import misc
 from gub import octal
@@ -209,7 +209,7 @@ packages.'''
             if texmf_dist:                self.texmf_dist_repo.update_workdir (self.expand ('%(srcdir)s/texmf-dist'))
             # ugh.
             if self.source.have_client ():
-                loggedos.download_url (logging.default_logger,
+                loggedos.download_url (gub_log.default_logger,
                                        license_url,
                                        self.expand ('%(srcdir)s'))
         self.func (defer)
@@ -300,12 +300,12 @@ def system (cmd, env={}, ignore_errors=False):
     call_env.update (env)
     for i in cmd.split ('\n'):
         if i:
-            loggedos.system (logging.default_logger, i % env, call_env, ignore_errors)
+            loggedos.system (gub_log.default_logger, i % env, call_env, ignore_errors)
 
 def main ():
     version = '15644'
     revision = '.1'
-    logging.default_logger.threshold = '1'
+    gub_log.default_logger.threshold = '1'
     for texmf in ['texlive-texmf', 'texlive-texmf-dist']:
         system ('''
 mkdir -p downloads/%(texmf)s-tiny

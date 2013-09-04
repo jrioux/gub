@@ -5,7 +5,7 @@ import re
 from gub.syntax import printf
 from gub import build
 from gub import context
-from gub import logging
+from gub import gub_log
 from gub import misc
 from gub import repository
 from gub import target
@@ -197,7 +197,7 @@ def get_cross_module (settings):
         if os.path.exists (file_name):
             break
 
-    logging.info ('module name: ' + name + '\n')
+    gub_log.info ('module name: ' + name + '\n')
     module = misc.load_module (file_name, base)
 
     cross_module_checksums[platform] = md5.md5 (open (file_name).read ()).hexdigest ()

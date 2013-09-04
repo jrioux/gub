@@ -4,7 +4,7 @@ import warnings
 #
 from gub.syntax import printf
 from gub import cross
-from gub import logging
+from gub import gub_log
 from gub import misc
 from gub import repository
 from gub import system
@@ -14,7 +14,7 @@ from gub import tools32
 
 def get_build_from_file (platform, file_name, name):
     gub_name = file_name.replace (os.getcwd () + '/', '')
-    logging.verbose ('reading spec: %(gub_name)s\n' % locals ())
+    gub_log.verbose ('reading spec: %(gub_name)s\n' % locals ())
     # Ugh, FIXME
     # This loads gub/specs/darwin/python.py in PYTHON. namespace,
     # overwriting the PYTHON. namespace from gub/specs/python.py
@@ -31,7 +31,7 @@ def get_build_from_file (platform, file_name, name):
                   .replace ('++', '_xx_')
                   .replace ('+', '_x_')
                   + ('-' + platform).replace ('-', '__'))
-    logging.debug ('LOOKING FOR: %(class_name)s\n' % locals ())
+    gub_log.debug ('LOOKING FOR: %(class_name)s\n' % locals ())
     cls = misc.most_significant_in_dict (module.__dict__, class_name, '__')
     if (platform == 'tools32'
         and (not cls or issubclass (cls, target.AutoBuild))):
@@ -46,7 +46,7 @@ def get_build_from_file (platform, file_name, name):
 def get_build_class (settings, flavour, name):
     cls = get_build_from_module (settings, name)
     if not cls:
-        logging.verbose ('making spec:  %(name)s\n' % locals ())
+        gub_log.verbose ('making spec:  %(name)s\n' % locals ())
         cls = get_build_without_module (flavour, name)
     if cls:
         cls._created_name = name
@@ -107,7 +107,7 @@ class Dependency:
         source = self.url ()
         if not isinstance (source, repository.Repository):
             source = repository.get_repository_proxy (dir, source, branch)
-        logging.default_logger.write_log ('cls:' + str (self.build_class ()) + '\n', 'output')
+        gub_log.default_logger.write_log ('cls:' + str (self.build_class ()) + '\n', 'output')
         return self.build_class () (self.settings, source)
 
     def build_class (self):
@@ -131,7 +131,7 @@ class Dependency:
         if not self._url:
             self._url = self.build_class ().source
         if not self._url:
-            logging.warning ('no source specified in class: '
+            gub_log.warning ('no source specified in class: '
                              + self.build_class ().__name__ + '\n')
         if not self._url:
             self._url = self.settings.dependency_url (self.name ())

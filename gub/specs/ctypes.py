@@ -47,7 +47,7 @@ build_ext.build_ext.get_libraries = get_libraries
 ' --libdir=%(prefix_dir)s/lib'
 ' CFLAGS=-I%(system_prefix)s/include/python%(python_version)s'
 ]
-''' 
+'''
 )],
                        '%(srcdir)s/setup.py')
         self.file_sub ([("""LIBFFI_SOURCES='source/libffi'""",

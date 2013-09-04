@@ -3,13 +3,13 @@ import shutil
 import subprocess
 import sys
 #
-from gub import logging
+from gub import gub_log
 from gub import misc
 
 ########
 # logged aliases to misc.py
 def logged_function (logger, function, *args, **kwargs):
-    if not isinstance (logger, logging.AbstractCommandLogger):
+    if not isinstance (logger, gub_log.AbstractCommandLogger):
         raise Exception ('NOT a logger:' + str (logger))
     logger.write_multilevel_message (
         [('Running %s\n' % function.__name__, 'action'),
@@ -97,14 +97,14 @@ sys.modules[__name__] = Module(sys.modules[__name__])
 
 def test ():
     import unittest
-    from gub import logging
+    from gub import gub_log
 
     # This is not a unittest, it only serves as a smoke test
 
     class Test_loggedos (unittest.TestCase):
         def setUp (self):
             # Urg: global??
-            self.logger = logging.set_default_log ('downloads/test/test.log', 5)
+            self.logger = gub_log.set_default_log ('downloads/test/test.log', 5)
             self.loggedos = Module('loggedos')
         def testDumpFile (self):
             self.loggedos.dump_file (self.logger, 'boe', 'downloads/test/a')

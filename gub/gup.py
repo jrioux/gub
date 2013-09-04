@@ -19,7 +19,7 @@ from gub import cross
 from gub.db import db
 from gub import dependency
 from gub import locker
-from gub import logging
+from gub import gub_log
 from gub import loggedos
 from gub import misc
 import gub.settings
@@ -51,7 +51,7 @@ class FileManager:
         self.lock_file = self.root + '.lock'
         self.lock = locker.Locker (self.lock_file)
         if clean:
-            loggedos.system (logging.default_logger,
+            loggedos.system (gub_log.default_logger,
                              'rm -fr %s' % self.config)
         self.make_dirs ()
         files_db = self.config + '/files.db'
@@ -71,10 +71,10 @@ class FileManager:
 
     def make_dirs (self):
         if not os.path.isdir (self.config):
-            loggedos.system (logging.default_logger,
+            loggedos.system (gub_log.default_logger,
                              'mkdir -p %s' % self.config)
         if not os.path.isdir (self.root):
-            loggedos.system (logging.default_logger,
+            loggedos.system (gub_log.default_logger,
                              'mkdir -p %s' % self.root)
 
     def package_installed_files (self, name):
@@ -96,11 +96,11 @@ class FileManager:
         return name in self.installed_files ()
 
     def install_tarball (self, ball, name, prefix_dir):
-        logging.action ('untarring: %(ball)s\n' % locals ())
+        gub_log.action ('untarring: %(ball)s\n' % locals ())
 
         _z = misc.compression_flag (ball)
         _v = '' # self.os_interface.verbose_flag ()
-        lst = loggedos.read_pipe (logging.default_logger,
+        lst = loggedos.read_pipe (gub_log.default_logger,
                                   'tar -t%(_z)s -f "%(ball)s"'
                                   % locals ()).split ('\n')
         conflicts = False
@@ -111,14 +111,14 @@ class FileManager:
             if (':' + f + ':' in installed_files_string
                 and not os.path.isdir (os.path.join (self.root, f))):
                 package = self._file_package_db[f]
-                logging.error ('already have file %(f)s: %(package)s\n'
+                gub_log.error ('already have file %(f)s: %(package)s\n'
                                % locals ())
                 conflicts = True
-        logging.command ('GUP: for f in lst:' + misc.timing () + '\n')
+        gub_log.command ('GUP: for f in lst:' + misc.timing () + '\n')
         if conflicts and not self.is_distro:
             raise Exception ('Duplicate files found.')
         root = self.root
-        loggedos.system (logging.default_logger,
+        loggedos.system (gub_log.default_logger,
                          # cd %(root)s to avoid open(2) of cwd, see
                          # http://lists.gnu.org/archive/html/lilypond-devel/2009-03/msg00304.html
                          'cd %(root)s && tar -C %(root)s -p -x%(_z)s%(_v)s -f %(ball)s'
@@ -136,7 +136,7 @@ class FileManager:
                 self._file_package_db[f] = name
 
         if os.path.exists ('%(root)s/usr/etc/postinstall/%(name)s' % locals ()):
-            loggedos.system (logging.default_logger,
+            loggedos.system (gub_log.default_logger,
                              'PATH=%(root)s/usr/bin:$PATH %(root)s/usr/etc/postinstall/%(name)s && mv %(root)s/usr/etc/postinstall/%(name)s %(root)s/usr/etc/postinstall/%(name)s.done || :' % locals ())
 
     def libtool_la_fixup (self, root, file):
@@ -145,7 +145,7 @@ class FileManager:
         if file.startswith ('./'):
             file = file[2:]
         dir = os.path.dirname (file)
-        loggedos.file_sub (logging.default_logger,
+        loggedos.file_sub (gub_log.default_logger,
                            [('^libdir=.*',
                              """libdir='%(root)s/%(dir)s'""" % locals ()
                              ),],
@@ -163,14 +163,14 @@ class FileManager:
         dir = os.path.dirname (file)
         if '%' in prefix_dir or not prefix_dir:
             barf
-        loggedos.file_sub (logging.default_logger,
+        loggedos.file_sub (gub_log.default_logger,
                            [('(-I|-L) */usr',
                              '''\\1%(root)s%(prefix_dir)s''' % locals ()
                              ),],
                            '%(root)s/%(file)s' % locals ())
 
     def uninstall_package (self, name):
-        logging.action ('uninstalling package: %s\n' % name)
+        gub_log.action ('uninstalling package: %s\n' % name)
 
         lst = self.package_installed_files (name)
 
@@ -196,7 +196,7 @@ class FileManager:
             try:
                 os.rmdir (d)
             except OSError:
-                logging.verbose ('warning: %(d)s not empty\n' % locals ())
+                gub_log.verbose ('warning: %(d)s not empty\n' % locals ())
         for f in lst:
             ## fixme (?)  -- when is f == ''
             if not f or f.endswith ('/'):
@@ -224,16 +224,16 @@ class PackageDictManager:
             nm = d['split_name']
         if 0 and (nm in self._packages):
             if self._packages[nm]['spec_checksum'] != d['spec_checksum']:
-                logging.info ('******** checksum of %s changed!\n\n' % nm)
+                gub_log.info ('******** checksum of %s changed!\n\n' % nm)
 
             if self._packages[nm]['cross_checksum'] != d['cross_checksum']:
-                logging.info ('******** checksum of cross changed for %s\n' % nm)
+                gub_log.info ('******** checksum of cross changed for %s\n' % nm)
             return
         self._packages[nm] = d
         
     def register_package_header (self, package_hdr, branch_dict):
         if self.verbose:
-            logging.info ('reading package header: %s\n'
+            gub_log.info ('reading package header: %s\n'
                           % package_hdr.__repr__ ())
 
         str = open (package_hdr).read ()
@@ -247,13 +247,13 @@ class PackageDictManager:
             if ':' in branch:
                 (remote_branch, branch) = tuple (branch.split (':'))
             if branch != vc_branch:
-                logging.error ('package of branch: %(vc_branch)s, expecting: %(branch)s\n' % locals ())
-                logging.error ('ignoring header: %(header_name)s\n' % locals ())
+                gub_log.error ('package of branch: %(vc_branch)s, expecting: %(branch)s\n' % locals ())
+                gub_log.error ('ignoring header: %(header_name)s\n' % locals ())
                 return
         elif d['vc_branch']:
-            logging.error ('no branch for package: %(name)s\n' % locals ())
-            logging.error ('ignoring header: %(header_name)s\n' % locals ())
-            logging.error ('available branch: %(vc_branch)s\n' % locals ())
+            gub_log.error ('no branch for package: %(name)s\n' % locals ())
+            gub_log.error ('ignoring header: %(header_name)s\n' % locals ())
+            gub_log.error ('available branch: %(vc_branch)s\n' % locals ())
             return
         
         name = d['split_name']
@@ -261,7 +261,7 @@ class PackageDictManager:
           ## FIXME ?
           if name in self._package_dict_db:
               if str != self._package_dict_db[name]:
-                  logging.info ("package header changed for %s\n" % name)
+                  gub_log.info ("package header changed for %s\n" % name)
 
               return
 
@@ -326,10 +326,10 @@ class PackageManager (FileManager, PackageDictManager):
     def install_package (self, name):
         if self.is_installed (name):
             return
-        logging.action ('installing package: %s\n' % name)
+        gub_log.action ('installing package: %s\n' % name)
         if self.is_installed (name):
             message = 'already have package: ' + name + '\n'
-            logging.error (message)
+            gub_log.error (message)
             raise Exception (message)
         d = self._packages[name]
         ball = '%(split_ball)s' % d
@@ -359,7 +359,7 @@ class DependencyManager (PackageManager):
             return [misc.strip_platform (x)
                     for x in self.dict_dependencies (self._packages[name])]
         except KeyError:
-            logging.error ('no such package: %(name)s\n' % locals ())
+            gub_log.error ('no such package: %(name)s\n' % locals ())
             return list ()
 
     def dict_dependencies (self, dict):

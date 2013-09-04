@@ -43,7 +43,7 @@ import sys
 #
 from gub.syntax import printf
 from gub import gup
-from gub import logging
+from gub import gub_log
 from gub import misc
 from gub.settings import Settings
 
@@ -193,9 +193,9 @@ def main ():
     options.root = settings.system_root
     options.platform = settings.platform
 
-    logging.default_logger.threshold = options.verbosity
-    logging.verbose ('root: ' + settings.system_root + '\n')
-    logging.verbose ('platform: ' + settings.platform + '\n')
+    gub_log.default_logger.threshold = options.verbosity
+    gub_log.verbose ('root: ' + settings.system_root + '\n')
+    gub_log.verbose ('platform: ' + settings.platform + '\n')
 
     # TODO: hook log into target/PLAT/log
     target_manager = gup.DependencyManager (options.root,
