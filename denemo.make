@@ -55,7 +55,7 @@ nsis:
 	bin/gub tools::nsis
 
 update-versions:
-	python gub/versiondb.py --no-sources --version-db=versiondb/denemo.versions --download --platforms="mingw" --url=http://lilypond.org/blog/janneke/software/denemo
+	$(PYTHON) gub/versiondb.py --no-sources --version-db=versiondb/denemo.versions --download --platforms="mingw" --url=http://lilypond.org/blog/janneke/software/denemo
 
 print-success:
 	@echo "success!!"
