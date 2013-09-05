@@ -1,7 +1,7 @@
 from gub import target
 
 class Lash (target.AutoBuild):
-    source = 'http://www.very-clever.com/download/nongnu/lash/lash-0.6.0~rc2.tar.bz2'
+    source = 'http://download.savannah.gnu.org/releases/lash/lash-0.6.0~rc2.tar.bz2'
     patches = ['lash-0.6.0.rc2.patch']
     dependencies = ['tools::automake', 'tools::pkg-config',
                 'e2fsprogs-devel',

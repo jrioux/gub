@@ -5,7 +5,7 @@ from gub import tools
 from gub import loggedos
 
 class Binutils__tools (tools.AutoBuild):
-    source = 'http://ftp.gnu.org/pub/gnu/binutils/binutils-2.19.1.tar.gz'
+    source = 'http://ftp.gnu.org/pub/gnu/binutils/binutils-2.19.1.tar.bz2'
     dependencies = ['system::gcc']
         # binutils' makefile uses:
         #     MULTIOSDIR = `$(CC) $(LIBCFLAGS) -print-multi-os-directory`

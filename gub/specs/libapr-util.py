@@ -1,7 +1,7 @@
 from gub import tools
 
 class Libapr_util__tools (tools.AutoBuild):
-    source = 'http://apache.cs.uu.nl/dist/apr/apr-util-1.3.9.tar.gz'
+    source = 'http://archive.apache.org/dist/apr/apr-util-1.3.9.tar.gz'
     dependencies = [
             'libapr-devel',
             ]

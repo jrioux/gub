@@ -2,7 +2,7 @@ from gub import loggedos
 from gub import target
 
 class Libpcre (target.AutoBuild):
-    source = 'http://surfnet.dl.sourceforge.net/sourceforge/prce/pcre-7.8.tar.bz2'
+    source = 'http://downloads.sourceforge.net/project/pcre/pcre/7.8/pcre-7.8.tar.bz2'
     def name (self):
         return 'libpcre'
 

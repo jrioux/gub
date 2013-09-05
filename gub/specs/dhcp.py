@@ -3,7 +3,7 @@ from gub import target
 
 class Dhcp (target.AutoBuild):
     #source = 'http://ftp.isc.org/isc/dhcp/dhcp-4.1.0a2.tar.gz'
-    source = 'http://ftp.isc.org/isc/dhcp/dhcp-3.0.7.tar.gz&strip=2'
+    source = 'http://ftp.isc.org/isc/dhcp/dhcp-3.0-history/dhcp-3.0.7.tar.gz&strip=2'
     srcdir_build_broken = True
     subpackage_names = ['']
     configure_command = '%(srcdir)s/configure linux-2.2'

@@ -7,7 +7,7 @@ from gub import target
 #       sort-out what exactly is Qmake build, qt, and qtopia-core specific
 
 class Qtopia_core (target.AutoBuild):
-    source = 'ftp://ftp.trolltech.com/qt/source/qtopia-core-opensource-src-4.2.2.tar.gz'
+    source = 'ftp://ftp.uni-bayreuth.de/X11/gui/qt/source/qtopia-core-opensource-src-4.2.2.tar.gz'
     def __init__ (self, settings, source):
         target.AutoBuild.__init__ (self, settings, source)
         self.compile_dict = {

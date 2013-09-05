@@ -2,7 +2,7 @@
 from gub import tools
 
 class Util_linux__tools (tools.AutoBuild):
-    source = 'http://www.nl.kernel.org/pub/linux/utils/util-linux-ng/v2.16/util-linux-ng-2.16.tar.gz'
+    source = 'http://www.kernel.org/pub/linux/utils/util-linux/v2.16/util-linux-ng-2.16.tar.gz'
     dependencies = ['libtool']
     configure_flags = (tools.AutoBuild.configure_flags
                 + ' --disable-tls'
