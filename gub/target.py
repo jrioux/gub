@@ -238,8 +238,10 @@ echo "using gcc : 4.2.2 : PATH_TO_DIR/arm-softfloat-linux-gnu-g++ ; "
 > tools/build/v2/user-config.jam
 '''
         gcc_version = '' #don't care
+        python_version = ''
         self.dump ('''
 using gcc : %(gcc_version)s : %(system_prefix)s%(cross_dir)s/bin/%(CXX)s ;
+using python : %(python_version)s : %(system_prefix)s/bin/python ;
 ''',
                    '%(srcdir)s/tools/build/v2/user-config.jam',
                    env=locals ())

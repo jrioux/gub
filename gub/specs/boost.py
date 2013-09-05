@@ -53,6 +53,11 @@ class Boost (target.BjamBuild_v2):
                 + ' -sNO_BZIP2=1'
                 + ' -sNO_ZLIB=1'
                 + ' --with-'.join ([''] + boost_modules))
+    install_command = (target.BjamBuild_v2.install_command
+                .replace ('bjam ', '%(builddir)s/bjam ')
+                + ' -sNO_BZIP2=1'
+                + ' -sNO_ZLIB=1'
+                + ' --with-'.join ([''] + boost_modules))
     license_files = ['%(srcdir)s/LICENSE_1_0.txt']
     def install (self):
         target.BjamBuild_v2.install (self)
