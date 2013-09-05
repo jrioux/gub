@@ -1,7 +1,7 @@
 from gub import target
 
 class Libsndfile (target.AutoBuild):
-    source = 'http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.21.tar.gz'
+    source = 'http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.23.tar.gz'
     dependencies = [
         'tools::automake',
         'tools::pkg-config',
