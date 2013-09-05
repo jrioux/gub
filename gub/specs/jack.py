@@ -1,6 +1,6 @@
 from gub import target
 
 class Jack (target.WafBuild):
-    source = 'svn+http://subversion.jackaudio.org/jack/trunk/jack'
-    source = 'http://www.grame.fr/~letz/jack-1.9.2.tar.bz2'
+    source = 'http://jackaudio.org/downloads/jack-1.9.9.5.tar.bz2'
+    # requires python 2.6
     dependencies = ['tools::automake', 'tools::pkg-config',]
