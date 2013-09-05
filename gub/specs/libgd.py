@@ -3,7 +3,7 @@ from gub import target
 from gub import tools
 
 class Libgd (target.AutoBuild):
-    source = 'http://www.libgd.org/releases/gd-2.0.36RC1.tar.gz'
+    source = 'http://bitbucket.org/libgd/gd-libgd/downloads/libgd-2.1.0.tar.gz'
     dependencies = [
             'tools::libtool',
             'fontconfig',
