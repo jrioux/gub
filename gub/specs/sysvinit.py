@@ -2,7 +2,7 @@ from gub import misc
 from gub import target
 
 class Sysvinit (target.MakeBuild):
-    source = 'ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/sysvinit-2.86.tar.gz'
+    source = 'http://download.savannah.gnu.org/releases/sysvinit/sysvinit-2.88dsf.tar.bz2'
     subpackage_names = ['']
     make_flags = 'CC=%(toolchain_prefix)sgcc ROOT=%(install_root)s'
     compile_command = 'cd %(builddir)s/src && make %(make_flags)s'
