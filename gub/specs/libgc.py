@@ -7,6 +7,7 @@ class Libgc (target.AutoBuild):
 
 class Libgc__freebsd (Libgc):
     make_flags = 'THREADDLLIBS=-pthread'
+    patches = ['libgc_6.8-1.2ubuntu2.diff']
 
 class Libgc__freebsd__x86 (Libgc__freebsd):
     source = 'http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc6.8.tar.gz&version=6.8'
