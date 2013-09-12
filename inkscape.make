@@ -6,9 +6,8 @@ all: inkscape inkscape-installer print-success
 include gub.make
 
 
-INKSCAPE_BRANCH=trunk?revision=20605
-INKSCAPE_REPO_URL=svn:https://inkscape.svn.sourceforge.net/svnroot/inkscape?module=inkscape
-#source = 'svn:https://inkscape.svn.sourceforge.net/svnroot/inkscape&module=inkscape&branch=trunk&revision=20605'
+INKSCAPE_BRANCH=trunk?revision=22714
+INKSCAPE_REPO_URL=svn:http://svn.code.sf.net/p/inkscape/code/inkscape
 
 PLATFORMS=linux-x86
 # Cocoa/Carbon?

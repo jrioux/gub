@@ -4,7 +4,7 @@ from gub import misc
 from gub import target
 
 class Inkscape (target.AutoBuild):
-    source = 'svn:https://inkscape.svn.sourceforge.net/svnroot/inkscape&module=inkscape&branch=trunk&revision=22714'
+    source = 'svn:http://svn.code.sf.net/p/inkscape/code/inkscape?branch=trunk&revision=22714'
     branch = 'trunk'
     dependencies = [
         'cross/gcc-c++-runtime',
