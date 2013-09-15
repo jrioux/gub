@@ -54,7 +54,7 @@ schikkers-list-installers:
 	$(foreach p, $(PLATFORMS), $(call INVOKE_INSTALLER_BUILDER,$(p)) $(INSTALL_PACKAGE) &&) true #
 
 nsis:
-	bin/gub tools::nsis
+	$(GUB) tools::nsis
 
 update-versions:
 	$(PYTHON) gub/versiondb.py --no-sources --version-db=versiondb/schikkers-list.versions --download --platforms="mingw,linux-x86" --url=http://lilypond.org/schikkers-list/download/

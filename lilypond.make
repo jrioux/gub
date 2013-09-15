@@ -208,7 +208,7 @@ ptools:
 
 nsis:
 	$(info **** nsis rule)
-	bin/gub tools::nsis
+	$(GUB) tools::nsis
 
 ################################################################
 # docs
